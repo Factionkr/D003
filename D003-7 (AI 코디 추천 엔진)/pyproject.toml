@@ -1,0 +1,17 @@
+[project]
+name = "outfit-engine-4060"
+version = "0.1.0"
+description = "4060 Women-Targeted Digital Wardrobe Outfit Combination Engine"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.7.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+

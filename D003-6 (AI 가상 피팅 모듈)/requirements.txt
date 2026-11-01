@@ -1,0 +1,33 @@
+# ----------------------------------------------------------------------
+# AI Coordinator App - Virtual Try-On Module Dependencies
+# ----------------------------------------------------------------------
+
+# FastAPI & Web Framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# Database & ORM
+SQLAlchemy>=2.0.28
+
+# Async HTTP & Data Processing
+httpx>=0.27.0
+aiohttp>=3.9.3
+pillow>=10.2.0
+numpy>=1.26.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+
+# ----------------------------------------------------------------------
+# AI / Deep Learning Pipeline Acceleration (Inference Cluster Options)
+# ----------------------------------------------------------------------
+# torch>=2.2.0
+# torchvision>=0.17.0
+# diffusers>=0.27.0
+# transformers>=4.38.0
+# accelerate>=0.27.0
+# opencv-python-headless>=4.9.0
+

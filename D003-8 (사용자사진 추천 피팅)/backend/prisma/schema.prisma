@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-py"
+  output   = "../backend/prisma_client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  age_group String?  @default("4060")
+  createdAt DateTime @default(now())
+  userPhotos UserPhoto[]
+  styleProfile UserStyleProfile?
+  renderingJobs RenderingJob[]
+  outfitCombinations OutfitCombination[]
+}
+
+model UserPhoto {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  user             User     @relation(fields: [userId], references: [id])
+  photoUrl         String   @map("photo_url")
+  bodyShapeType    String   @map("body_shape_type")
+  isValidForFitting Boolean @default(true) @map("is_valid_for_fitting")
+  createdAt        DateTime @default(now()) @map("created_at")
+}
+
+model BodyAvatar {
+  id            String @id @default(uuid())
+  avatarCode    String @unique @map("avatar_code")
+  targetAgeGroup String @default("4060") @map("target_age_group")
+  avatarImageUrl String @map("avatar_image_url")
+  keypointMapUrl String? @map("keypoint_map_url")
+}
+
+model WardrobeItem {
+  id               String @id @default(uuid())
+  category         String
+  garmentImageUrl  String @map("garment_image_url")
+  fabricType       String? @map("fabric_type")
+  defaultLayerIndex Int @default(1) @map("default_layer_index")
+}
+
+model OutfitCombination {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  title     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  items     OutfitCombinationItem[]
+}
+
+model OutfitCombinationItem {
+  outfitId String @map("outfit_id")
+  outfit   OutfitCombination @relation(fields: [outfitId], references: [id])
+  itemId   String @map("item_id")
+  item     WardrobeItem @relation(fields: [itemId], references: [id])
+  layerIndex Int @map("layer_index")
+  @@id([outfitId, itemId])
+}
+
+model RenderingJob {
+  id                    String   @id @default(uuid())
+  userId                String   @map("user_id")
+  user                  User     @relation(fields: [userId], references: [id])
+  outfitId              String?  @map("outfit_id")
+  outfit                OutfitCombination? @relation(fields: [outfitId], references: [id])
+  status                String   @default("PENDING")
+  preserveFace          Boolean  @default(true) @map("preserve_face")
+  applySlimmingEffect   Boolean  @default(true) @map("apply_slimming_effect")
+  enhanceFabricTexture  Boolean  @default(true) @map("enhance_fabric_texture")
+  outputResolution      String   @default("1024x1536") @map("output_resolution")
+  resultImageUrl        String?  @map("result_image_url")
+  renderingTimeSec      Float?
+  createdAt             DateTime @default(now()) @map("created_at")
+}
+
+model UserStyleProfile {
+  userId          String @id @map("user_id")
+  user            User   @relation(fields: [userId], references: [id])
+  preferredFit    String @default("RELAXED_COVER_FIT") @map("preferred_fit")
+  bodyCoverTarget String @default("ABDOMEN_ARM_THIGH") @map("body_cover_target")
+  personalColor   String? @map("personal_color")
+  preferredStyles String[] @default([]) @map("preferred_styles")
+}
+
+model DigitalWardrobeItem {
+  id                String @id @default(uuid())
+  userId            String @map("user_id")
+  user              User   @relation(fields: [userId], references: [id])
+  category          String
+  garmentImageUrl   String @map("garment_image_url")
+  originalImageUrl  String? @map("original_image_url")
+  fabricType        String? @map("fabric_type")
+  defaultLayerIndex Int @default(1) @map("default_layer_index")
+  colorHex          String? @map("color_hex")
+  createdAt         DateTime @default(now()) @map("created_at")
+}
+
+model OutfitMatch {
+  id              String @id @default(uuid())
+  userId          String @map("user_id")
+  user            User   @relation(fields: [userId], references: [id])
+  tpoContext      String @map("tpo_context")
+  title           String
+  matchScore      Int @map("match_score")
+  coverFitTags    String[] @map("cover_fit_tags")
+  createdAt       DateTime @default(now()) @map("created_at")
+  items           OutfitMatchItem[]
+}
+
+model OutfitMatchItem {
+  outfitMatchId String @map("outfit_match_id")
+  outfitMatch   OutfitMatch @relation(fields: [outfitMatchId], references: [id])
+  wardrobeItemId String @map("wardrobe_item_id")
+  wardrobeItem  DigitalWardrobeItem @relation(fields: [wardrobeItemId], references: [id])
+  layerIndex Int @map("layer_index")
+  @@id([outfitMatchId, wardrobeItemId])
+}
+
