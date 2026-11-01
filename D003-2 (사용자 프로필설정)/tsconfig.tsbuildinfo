@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/api/onboardingapi.ts","./src/components/onboardingcontainer.tsx","./src/components/progressbar.tsx","./src/components/step1basicinfo.tsx","./src/components/step2location.tsx","./src/components/step3lifestyle.tsx","./src/components/step4style.tsx","./src/types/onboarding.ts"],"version":"5.6.3"}

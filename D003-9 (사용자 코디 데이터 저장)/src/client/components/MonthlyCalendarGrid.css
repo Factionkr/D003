@@ -1,0 +1,149 @@
+/* ──────── Monthly Calendar Grid Styles ──────── */
+
+.calendar-container {
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 16px;
+}
+
+.calendar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #555;
+  transition: background 0.15s;
+}
+
+.nav-btn:hover {
+  background: #e5e5e5;
+}
+
+/* Weekday row */
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.weekday-cell {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #888;
+  padding: 4px 0;
+}
+
+.weekday-cell.sunday { color: #ef4444; }
+.weekday-cell.saturday { color: #3b82f6; }
+
+/* Calendar grid */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day-cell {
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.day-cell:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.day-cell.empty {
+  cursor: default;
+  background: transparent;
+}
+
+.day-cell.empty:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* 착장 데이터가 있는 날짜 셀: 썸네일 마스킹 */
+.thumbnail-bg {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px;
+}
+
+.day-number {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.day-number.overlay {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.tpo-badge {
+  align-self: flex-end;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* 미착용일: 옷걸이 아이콘 */
+.day-cell.no-fit {
+  background: #f0f0f0;
+  border: 1px dashed #ccc;
+}
+
+.empty-day {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.hanger-icon {
+  font-size: 1.2rem;
+  opacity: 0.35;
+}
+
+.calendar-loading {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+}
+
