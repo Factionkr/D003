@@ -7,5 +7,5 @@ Write-Host "🚀 로컬 서버 주소: http://localhost:3000" -ForegroundColor G
 Write-Host "🌐 브라우저를 열고 있습니다..." -ForegroundColor Yellow
 
 Start-Process "http://localhost:3000"
-& "node" "c:\Project\D003\integrated-app\server.js"
+& "node" "$PSScriptRoot\server.js"
 

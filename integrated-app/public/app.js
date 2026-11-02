@@ -567,6 +567,8 @@ function setFittingItems(itemIds) {
 function openFittingWithSelected() {
   setFittingItems(['c10', 'c2', 'c6', 'c15']);
 }
+function _unused() {
+}
 
 // ==========================================
 // 7. 가상 피팅 스튜디오 (D003-6 & D003-8 VTON)
@@ -695,6 +697,30 @@ function saveTodayQuickOOTD() {
 
 function saveRecAsOotd(outerId, topId) {
   saveFittedOutfitToArchive();
+}
+
+function pickForFitting(itemId) {
+  const item = state.closet.find((c) => c.id === itemId);
+  if (!item) return;
+  if (!state.selectedFittingOutfit) state.selectedFittingOutfit = [state.closet[1], state.closet[9], state.closet[5]];
+  if (!state.selectedFittingOutfit.some((i) => i.id === itemId)) state.selectedFittingOutfit.push(item);
+  renderFittingLayers();
+  switchTab('fitting');
+  showToast(`'${item.name}' 아이템이 가상 피팅 룸에 추가되었습니다.`);
+}
+
+function logForDay(dateStr) {
+  state.archives.unshift({
+    id: `arch-${Date.now()}`,
+    date: dateStr,
+    title: '데일리 스타일링 기록',
+    occasion: '일상 및 외출',
+    rating: 5,
+    review: `${dateStr} 착장 기록이 추가되었습니다.`,
+    img: document.getElementById('fittingCanvasImg')?.src || state.closet[0].img
+  });
+  renderCalendarDays();
+  showToast(`${dateStr} OOTD 기록이 캘린더에 저장되었습니다!`);
 }
 
 function openLogOotdModal() {
