@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StyleAI - 올인원 AI 스마트 코디 & 가상 피팅 스튜디오</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Pretendard -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            },
+            fashion: {
+              dark: '#0f172a',
+              card: '#1e293b',
+              border: '#334155',
+              accent: '#8b5cf6',
+              gold: '#f59e0b',
+              emerald: '#10b981',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #0b0f19;
+      color: #f1f5f9;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      transform: translateY(-2px);
+      transition: all 0.2s ease-in-out;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .animate-pulse-slow {
+      animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-slate-100">
+
+  <!-- ================= TOP NAVBAR ================= -->
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-800 bg-slate-900/90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo & Brand -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+          <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <span class="text-xl font-bold tracking-tight text-white">Style<span class="text-violet-400">AI</span></span>
+            <span class="px-2 py-0.5 text-[10px] font-semibold bg-violet-500/20 text-violet-300 rounded-full border border-violet-500/30">D003 통합 Suite</span>
+          </div>
+          <p class="text-[11px] text-slate-400">올인원 스마트 코디 & 가상 피팅 룸</p>
+        </div>
+      </div>
+
+      <!-- Live Weather & Profile Pill -->
+      <div class="flex items-center space-x-3">
+        <!-- Weather Widget Pill (D003-3) -->
+        <div id="weatherPill" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs text-slate-300 cursor-pointer hover:border-violet-500/50 transition" onclick="switchTab('recommend')">
+          <i data-lucide="sun" class="w-4 h-4 text-amber-400" id="weatherIcon"></i>
+          <span id="navCityText" class="font-medium text-white">서울특별시</span>
+          <span id="navTempText" class="text-violet-400 font-bold">16.5°C</span>
+          <span class="text-slate-400">(체감 <span id="navFeelsLikeText">15.8°C</span>)</span>
+        </div>
+
+        <!-- User Profile Pill (D003-2) -->
+        <div class="flex items-center space-x-2.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 cursor-pointer hover:border-violet-500/50 transition" onclick="switchTab('profile')">
+          <div class="w-6 h-6 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center text-xs font-bold text-white" id="navAvatar">
+            스
+          </div>
+          <div class="text-xs">
+            <span id="navNickname" class="font-semibold text-white">스타일마스터</span>
+            <span id="navBodyBadge" class="text-[10px] text-violet-300 ml-1 px-1.5 py-0.5 bg-violet-900/60 rounded">모래시계형</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs Bar -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 sm:space-x-2 overflow-x-auto py-1.5 border-t border-slate-800/60 text-xs sm:text-sm font-medium">
+      <button class="nav-tab active-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-violet-400 bg-violet-500/10 font-semibold" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <span>대시보드</span>
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="bodyAnalysis" onclick="switchTab('bodyAnalysis')">
+        <i data-lucide="scan-face" class="w-4 h-4"></i>
+        <span>체형 분석 <span class="text-[10px] text-violet-400 font-mono">D1</span></span>
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="closet" onclick="switchTab('closet')">
+        <i data-lucide="archive" class="w-4 h-4"></i>
+        <span>스마트 옷장 <span class="text-[10px] text-violet-400 font-mono">D4</span></span>
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="recommend" onclick="switchTab('recommend')">
+        <i data-lucide="sparkles" class="w-4 h-4 text-violet-400"></i>
+        <span>AI 코디 추천 <span class="text-[10px] text-violet-400 font-mono">D5·7</span></span>
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="fitting" onclick="switchTab('fitting')">
+        <i data-lucide="shirt" class="w-4 h-4 text-fuchsia-400"></i>
+        <span>가상 피팅룸 <span class="text-[10px] text-fuchsia-400 font-mono">D6·8</span></span>
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="calendar" onclick="switchTab('calendar')">
+        <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i>
+        <span>OOTD 캘린더 <span class="text-[10px] text-emerald-400 font-mono">D9</span></span>
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-lg flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800" data-tab="profile" onclick="switchTab('profile')">
+        <i data-lucide="user-cog" class="w-4 h-4"></i>
+        <span>프로필 설정 <span class="text-[10px] text-violet-400 font-mono">D2</span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- 1. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="tab-view space-y-6">
+      <!-- Hero Welcome Banner -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-900/60 via-purple-900/40 to-slate-900 border border-violet-500/20 p-6 sm:p-8">
+        <div class="relative z-10 max-w-2xl">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 text-xs font-medium mb-3">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>D003 9개 모듈 완전 연동 가동 중</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            반가워요, <span id="dashWelcomeNick" class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">스타일마스터</span>님! ✨
+          </h1>
+          <p class="text-slate-300 text-sm sm:text-base mt-2 leading-relaxed">
+            오늘 <span id="dashCityText">서울특별시</span> 기온은 <strong class="text-violet-300" id="dashTempHighlight">16.5°C</strong>로 선선합니다. 
+            등록된 <strong class="text-white" id="dashClosetCount">18벌</strong>의 옷과 체형 분석 데이터를 종합하여 최적의 착장을 설계했습니다.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-5">
+            <button onclick="switchTab('recommend')" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm shadow-lg shadow-violet-600/30 flex items-center space-x-2 transition">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>오늘의 코디 추천받기</span>
+            </button>
+            <button onclick="switchTab('fitting')" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm flex items-center space-x-2 transition">
+              <i data-lucide="shirt" class="w-4 h-4 text-fuchsia-400"></i>
+              <span>AI 가상 피팅 룸</span>
+            </button>
+            <button onclick="switchTab('closet')" class="px-5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border border-slate-700/60 font-semibold text-sm flex items-center space-x-2 transition">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>새 옷 등록</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Weather Card (D003-3) -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800 relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400">실시간 날씨 & 기온</p>
+              <h3 class="text-2xl font-bold text-white mt-1" id="dashWeatherTemp">16.5°C</h3>
+              <p class="text-xs text-slate-300 mt-1" id="dashWeatherDesc">맑음 (체감 15.8°C)</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <i data-lucide="sun" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-violet-300">
+            💡 권장: 니트, 가디건, 자켓 레이어드
+          </div>
+        </div>
+
+        <!-- Body Shape Card (D003-1) -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400">체형 분석 상태</p>
+              <h3 class="text-2xl font-bold text-white mt-1" id="dashBodyType">모래시계형</h3>
+              <p class="text-xs text-slate-300 mt-1">상하체 밸런스 1:1.0 (허리 0.78)</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+              <i data-lucide="scan-face" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-emerald-400 flex items-center justify-between">
+            <span>추천: 랩 원피스, V넥 니트</span>
+            <span class="underline cursor-pointer" onclick="switchTab('bodyAnalysis')">자세히</span>
+          </div>
+        </div>
+
+        <!-- Closet Summary Card (D003-4) -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400">내 옷장 아이템</p>
+              <h3 class="text-2xl font-bold text-white mt-1" id="dashItemCountTotal">18벌</h3>
+              <p class="text-xs text-slate-300 mt-1">상의 5 · 하의 4 · 아우터 4 · 신발 3</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <i data-lucide="archive" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-blue-300 flex items-center justify-between">
+            <span>즐겨찾기: 10벌</span>
+            <span class="underline cursor-pointer" onclick="switchTab('closet')">옷장 열기</span>
+          </div>
+        </div>
+
+        <!-- OOTD Monthly Card (D003-9) -->
+        <div class="glass-card rounded-xl p-5 border border-slate-800">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-400">이번 달 OOTD 기록</p>
+              <h3 class="text-2xl font-bold text-white mt-1">2일 기록됨</h3>
+              <p class="text-xs text-slate-300 mt-1">평균 코디 만족도 ⭐ 4.8 / 5.0</p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-emerald-300 flex items-center justify-between">
+            <span>최다 착용: 레더 스니커즈</span>
+            <span class="underline cursor-pointer" onclick="switchTab('calendar')">캘린더</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Top Recommended Outfit Spotlight (D003-7) -->
+      <div class="glass-card rounded-2xl p-6 border border-slate-800">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-500/20 text-violet-300 border border-violet-500/30">AI 추천 1순위</span>
+              <h2 class="text-lg font-bold text-white">오늘의 일정 맞춤 추천 코디</h2>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">TPO: 중요 비즈니스 미팅 (Formality 4.2) & 기온 16.5°C 반영</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs text-slate-400">종합 매칭 지수</span>
+            <span class="px-3 py-1 rounded-lg bg-violet-600/30 text-violet-300 font-extrabold text-sm border border-violet-500/40">96점 / 100점</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 items-center">
+          <!-- Outfit Items Carousel/List (7 Cols) -->
+          <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/80 flex flex-col items-center text-center">
+              <span class="text-[10px] text-violet-400 font-semibold mb-1">OUTER</span>
+              <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=300" class="w-24 h-28 object-cover rounded-lg mb-2 shadow" />
+              <p class="text-xs font-semibold text-white truncate w-full">다크네이비 테일러드 블레이저</p>
+              <span class="text-[10px] text-slate-400 mt-0.5">네이비 · 봄/가을</span>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/80 flex flex-col items-center text-center">
+              <span class="text-[10px] text-violet-400 font-semibold mb-1">TOP</span>
+              <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300" class="w-24 h-28 object-cover rounded-lg mb-2 shadow" />
+              <p class="text-xs font-semibold text-white truncate w-full">스카이블루 옥스포드 셔츠</p>
+              <span class="text-[10px] text-slate-400 mt-0.5">블루 · 비즈니스</span>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/80 flex flex-col items-center text-center">
+              <span class="text-[10px] text-violet-400 font-semibold mb-1">PANTS</span>
+              <img src="https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?w=300" class="w-24 h-28 object-cover rounded-lg mb-2 shadow" />
+              <p class="text-xs font-semibold text-white truncate w-full">차콜 원턱 세미와이드 슬랙스</p>
+              <span class="text-[10px] text-slate-400 mt-0.5">그레이 · 세미와이드</span>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/80 flex flex-col items-center text-center">
+              <span class="text-[10px] text-violet-400 font-semibold mb-1">SHOES</span>
+              <img src="https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=300" class="w-24 h-28 object-cover rounded-lg mb-2 shadow" />
+              <p class="text-xs font-semibold text-white truncate w-full">블랙 플레인토 가죽 페니 로퍼</p>
+              <span class="text-[10px] text-slate-400 mt-0.5">블랙 · 포멀</span>
+            </div>
+          </div>
+
+          <!-- Stylist Reasoning Panel (5 Cols) -->
+          <div class="lg:col-span-5 bg-slate-800/50 rounded-xl p-5 border border-slate-700/60 space-y-3">
+            <div class="flex items-center space-x-2 text-violet-400 font-bold text-sm">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+              <span>AI 스타일리스트 정밀 리포트</span>
+            </div>
+            <div class="text-xs text-slate-300 space-y-2">
+              <p><strong class="text-white">TPO 부합성:</strong> 중요 미팅에 최적화된 테일러드 실루엣과 차분한 컬러감으로 신뢰도를 극대화했습니다.</p>
+              <p><strong class="text-white">기온 대응:</strong> 16.5°C 일교차를 고려하여 통기성 좋은 옥스포드 셔츠 위에 울 블레이저를 레이어드했습니다.</p>
+              <p><strong class="text-white">체형 보완:</strong> 모래시계형 허리선을 자연스럽게 살리고, 세미와이드 슬랙스로 곧은 다리 라인을 형성합니다.</p>
+            </div>
+            <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between">
+              <button onclick="openFittingWithSelected()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 text-white font-semibold text-xs flex items-center space-x-1.5 transition">
+                <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                <span>가상 피팅룸에서 착용해보기</span>
+              </button>
+              <button onclick="saveTodayQuickOOTD()" class="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs transition">
+                오늘의 OOTD로 저장
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. BODY ANALYSIS VIEW (D003-1) -->
+    <section id="view-bodyAnalysis" class="tab-view hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="scan-face" class="w-6 h-6 text-violet-400"></i>
+            <span>사용자 체형 정밀 분석 랩 (D003-1)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            관절 랜드마크 비율(Shoulder, Waist, Hip Ratio)을 분석하여 5대 체형을 자동 판정하고 맞춤 의류를 매핑합니다.
+          </p>
+        </div>
+        <!-- Preset Selector Buttons -->
+        <div class="flex flex-wrap gap-2 text-xs">
+          <span class="text-slate-400 self-center mr-1">체형 프리셋:</span>
+          <button onclick="applyBodyPreset('모래시계형')" class="preset-btn px-3 py-1.5 rounded-lg bg-violet-600 text-white font-semibold">모래시계형</button>
+          <button onclick="applyBodyPreset('역삼각형')" class="preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">역삼각형</button>
+          <button onclick="applyBodyPreset('삼각형(A라인)')" class="preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">삼각형(A라인)</button>
+          <button onclick="applyBodyPreset('직사각형')" class="preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">직사각형</button>
+          <button onclick="applyBodyPreset('라운드형')" class="preset-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">라운드형</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Interactive Sliders & Visualizer (6 Cols) -->
+        <div class="lg:col-span-6 glass-card rounded-2xl p-6 border border-slate-800 space-y-5">
+          <h3 class="text-sm font-bold text-white flex items-center justify-between">
+            <span>신체 부위별 너비 비율 조절 (실시간 랜드마크)</span>
+            <span class="text-xs text-violet-400">MediaPipe Pose 규격</span>
+          </h3>
+
+          <div class="space-y-4 text-xs">
+            <!-- Shoulder Width -->
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>어깨 너비 (Shoulder Width)</span>
+                <span id="valShoulder" class="font-bold text-violet-400">24 cm (0.24)</span>
+              </div>
+              <input type="range" id="sliderShoulder" min="15" max="35" value="24" class="w-full accent-violet-500 cursor-pointer" oninput="updateBodyAnalysis()">
+            </div>
+
+            <!-- Waist Width -->
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>허리 너비 (Waist Width)</span>
+                <span id="valWaist" class="font-bold text-violet-400">12 cm (0.12)</span>
+              </div>
+              <input type="range" id="sliderWaist" min="8" max="30" value="12" class="w-full accent-violet-500 cursor-pointer" oninput="updateBodyAnalysis()">
+            </div>
+
+            <!-- Hip Width -->
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>골반/엉덩이 너비 (Hip Width)</span>
+                <span id="valHip" class="font-bold text-violet-400">24 cm (0.24)</span>
+              </div>
+              <input type="range" id="sliderHip" min="15" max="35" value="24" class="w-full accent-violet-500 cursor-pointer" oninput="updateBodyAnalysis()">
+            </div>
+          </div>
+
+          <!-- Body Wireframe Visualizer Canvas -->
+          <div class="relative w-full h-64 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden">
+            <svg id="bodySvg" class="w-full h-full p-4" viewBox="0 0 200 300">
+              <!-- Grid Background Lines -->
+              <line x1="100" y1="20" x2="100" y2="280" stroke="#334155" stroke-dasharray="3,3" />
+              <!-- Head -->
+              <circle cx="100" cy="45" r="18" fill="#64748b" />
+              <!-- Neck -->
+              <line x1="100" y1="63" x2="100" y2="75" stroke="#94a3b8" stroke-width="4" />
+              <!-- Torso Body Silhouette Shape -->
+              <polygon id="torsoPoly" points="76,80 124,80 112,145 124,190 76,190 88,145" fill="rgba(139, 92, 246, 0.25)" stroke="#8b5cf6" stroke-width="2" />
+              <!-- Skeleton Joints Points -->
+              <circle id="ptLeftShoulder" cx="76" cy="80" r="4" fill="#a78bfa" />
+              <circle id="ptRightShoulder" cx="124" cy="80" r="4" fill="#a78bfa" />
+              <circle id="ptLeftWaist" cx="88" cy="145" r="4" fill="#f43f5e" />
+              <circle id="ptRightWaist" cx="112" cy="145" r="4" fill="#f43f5e" />
+              <circle id="ptLeftHip" cx="76" cy="190" r="4" fill="#38bdf8" />
+              <circle id="ptRightHip" cx="124" cy="190" r="4" fill="#38bdf8" />
+              <!-- Legs -->
+              <line x1="84" y1="190" x2="80" y2="275" stroke="#64748b" stroke-width="4" />
+              <line x1="116" y1="190" x2="120" y2="275" stroke="#64748b" stroke-width="4" />
+            </svg>
+            <div class="absolute bottom-2 right-3 text-[10px] text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">
+              실시간 2D 골격 렌더링
+            </div>
+          </div>
+        </div>
+
+        <!-- Body Type Result & Recommended Styling Rules (6 Cols) -->
+        <div class="lg:col-span-6 glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="text-xs font-semibold text-slate-400">분석된 신체 유형</span>
+              <span id="resultTypeBadge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-violet-500/20 text-violet-300 border border-violet-500/40">
+                모래시계형 (Hourglass)
+              </span>
+            </div>
+
+            <!-- Ratio Metrics -->
+            <div class="grid grid-cols-2 gap-3 my-4">
+              <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 text-center">
+                <span class="text-[11px] text-slate-400">어깨 대비 골반 비율 (S/H)</span>
+                <p id="metricSH" class="text-lg font-bold text-white mt-0.5">1.00</p>
+                <span class="text-[10px] text-emerald-400">상하체 완벽 균형</span>
+              </div>
+              <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 text-center">
+                <span class="text-[11px] text-slate-400">골반 대비 허리 비율 (W/H)</span>
+                <p id="metricWH" class="text-lg font-bold text-white mt-0.5">0.50</p>
+                <span class="text-[10px] text-violet-400">슬림 허리 라인</span>
+              </div>
+            </div>
+
+            <!-- Styling Tips -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-white flex items-center space-x-1.5">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                <span>체형 보완 최적 스타일링 솔루션</span>
+              </h4>
+              <ul id="bodyStylingTipsList" class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                <li>균형 잡힌 상하체와 슬림한 허리선을 자연스럽게 강조하세요.</li>
+                <li>허리 라인을 잡아주는 랩 원피스나 벨티드 아우터가 베스트입니다.</li>
+                <li>과도한 박시핏보다는 신체 실루엣을 살려주는 레귤러/슬림핏 추천.</li>
+              </ul>
+            </div>
+
+            <!-- Recommended vs Avoid Items -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-800">
+              <div>
+                <span class="text-[11px] font-bold text-emerald-400 flex items-center space-x-1">
+                  <i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i>
+                  <span>강력 추천 아이템</span>
+                </span>
+                <div id="bodyRecItems" class="flex flex-wrap gap-1.5 mt-2">
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[11px] border border-emerald-500/20">랩 드레스</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[11px] border border-emerald-500/20">V넥 니트</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[11px] border border-emerald-500/20">벨티드 코트</span>
+                </div>
+              </div>
+              <div>
+                <span class="text-[11px] font-bold text-rose-400 flex items-center space-x-1">
+                  <i data-lucide="thumbs-down" class="w-3.5 h-3.5"></i>
+                  <span>주의/피해야 할 아이템</span>
+                </span>
+                <div id="bodyAvoidItems" class="flex flex-wrap gap-1.5 mt-2">
+                  <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 text-[11px] border border-rose-500/20">박시 통원피스</span>
+                  <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 text-[11px] border border-rose-500/20">과한 어깨패드</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveBodyAnalysisToProfile()" class="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs shadow-lg shadow-violet-600/20 transition flex items-center justify-center space-x-2">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>현재 분석 결과를 내 프로필에 영구 저장</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CLOSET VIEW (D003-4) -->
+    <section id="view-closet" class="tab-view hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="archive" class="w-6 h-6 text-violet-400"></i>
+            <span>사용자 스마트 디지털 옷장 (D003-4)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            10대 카테고리 분류 체계와 계절, 색상, 스타일 태그로 관리되는 나만의 패션 인벤토리입니다.
+          </p>
+        </div>
+        <button onclick="openAddItemModal()" class="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs flex items-center space-x-2 shadow-lg shadow-violet-600/30 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>새 의류 아이템 등록</span>
+        </button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex items-center space-x-2 overflow-x-auto pb-2 text-xs">
+        <button class="closet-cat-btn active-cat px-3.5 py-1.5 rounded-lg bg-violet-600 text-white font-semibold whitespace-nowrap" data-cat="all" onclick="filterClosetCategory('all')">전체 (18)</button>
+        <button class="closet-cat-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap" data-cat="top" onclick="filterClosetCategory('top')">상의 (Top)</button>
+        <button class="closet-cat-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap" data-cat="pants" onclick="filterClosetCategory('pants')">바지 (Pants)</button>
+        <button class="closet-cat-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap" data-cat="outer" onclick="filterClosetCategory('outer')">아우터 (Outer)</button>
+        <button class="closet-cat-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap" data-cat="shoes" onclick="filterClosetCategory('shoes')">신발 (Shoes)</button>
+        <button class="closet-cat-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap" data-cat="bag" onclick="filterClosetCategory('bag')">가방 (Bag)</button>
+        <button class="closet-cat-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap" data-cat="favorite" onclick="filterClosetCategory('favorite')">⭐ 즐겨찾기</button>
+      </div>
+
+      <!-- Items Grid -->
+      <div id="closetGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- 4. RECOMMEND VIEW (D003-5 & D003-7) -->
+    <section id="view-recommend" class="tab-view hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="sparkles" class="w-6 h-6 text-violet-400"></i>
+            <span>AI 코디 추천 & 스코어링 엔진 (D003-5 · D003-7)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            날씨, TPO 일정, 체형 보완도, 컬러 조화를 5대 가중치(100점)로 평가하고 최적의 코디를 생성합니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Context Input Settings (Schedule TPO + Weather) -->
+      <div class="glass-card rounded-2xl p-6 border border-slate-800">
+        <h3 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-violet-400"></i>
+          <span>오늘의 상황(Context) 입력 설정</span>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <!-- Occasion Selection (D003-5) -->
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">일정 유형 (Occasion TPO)</label>
+            <select id="selOccasion" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500" onchange="syncOccasionFormality()">
+              <option value="WORK_MEETING">중요 비즈니스 미팅 (Formality 4.5)</option>
+              <option value="WORK_OFFICE">일반 사무실 출근 (Formality 3.2)</option>
+              <option value="WEDDING_GUEST">결혼식 하객 참석 (Formality 4.0)</option>
+              <option value="SPECIAL_ANNIVERSARY">데이트 / 특별 기념일 (Formality 3.0)</option>
+              <option value="WEEKEND_OUTING">주말 성수/홍대 나들이 (Formality 1.8)</option>
+              <option value="WEEKEND_DAILY">가벼운 동네 외출 (Formality 1.0)</option>
+            </select>
+          </div>
+
+          <!-- Formality Level Slider -->
+          <div>
+            <div class="flex justify-between text-slate-300 mb-1.5 font-medium">
+              <span>격식 수준 (Formality Level)</span>
+              <span id="txtFormalityLevel" class="font-bold text-violet-400">4.5 / 5.0</span>
+            </div>
+            <input type="range" id="sliderFormality" min="1.0" max="5.0" step="0.1" value="4.5" class="w-full accent-violet-500 cursor-pointer mt-2" oninput="document.getElementById('txtFormalityLevel').innerText = Number(this.value).toFixed(1) + ' / 5.0'">
+          </div>
+
+          <!-- City & Weather Override -->
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">지역 날씨 선택</label>
+            <select id="selCityWeather" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500" onchange="changeWeatherCity(this.value)">
+              <option value="서울특별시">서울특별시 (16.5°C · 맑음)</option>
+              <option value="부산광역시">부산광역시 (19.2°C · 쾌청함)</option>
+              <option value="제주시">제주시 (20.1°C · 구름)</option>
+              <option value="New York">New York (13.4°C · 비)</option>
+              <option value="Paris">Paris (11.2°C · 쌀쌀함)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-slate-800 flex justify-end">
+          <button onclick="generateRecommendationRun()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 text-white font-bold text-sm shadow-lg shadow-violet-600/30 flex items-center space-x-2 transition">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>AI 코디 추천 실행하기</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recommendation Results List -->
+      <div id="recommendationResultsContainer" class="space-y-6">
+        <!-- Dynamic recommendations will render here -->
+      </div>
+    </section>
+
+    <!-- 5. FITTING ROOM VIEW (D003-6 & D003-8) -->
+    <section id="view-fitting" class="tab-view hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="shirt" class="w-6 h-6 text-fuchsia-400"></i>
+            <span>AI 가상 피팅 스튜디오 (D003-6 · D003-8)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            OpenPose 신체 포즈 감지 및 IDM-VTON / CatVTON 디퓨전 기반 실시간 의류 착장 시뮬레이터입니다.
+          </p>
+        </div>
+        <!-- VTON Model Selector -->
+        <div class="flex items-center space-x-2 text-xs">
+          <span class="text-slate-400">VTON 모델:</span>
+          <select id="selVTONModel" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-white font-medium focus:outline-none">
+            <option value="IDM-VTON">IDM-VTON (고품질 Diffusion)</option>
+            <option value="CatVTON">CatVTON (고속 실시간 Attention)</option>
+            <option value="VITON-HD">VITON-HD (경량 GAN TPS)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Canvas Viewer (7 Cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800 flex flex-col items-center">
+          <div class="relative w-full max-w-sm aspect-[3/4] bg-slate-900 rounded-2xl border-2 border-dashed border-slate-700 overflow-hidden flex items-center justify-center shadow-2xl">
+            <!-- Avatar / Result Image -->
+            <img id="fittingCanvasImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80" class="w-full h-full object-cover transition duration-300" />
+
+            <!-- Pipeline Progress Overlay -->
+            <div id="fittingProgressOverlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center hidden">
+              <div class="w-12 h-12 rounded-full border-4 border-violet-500 border-t-transparent animate-spin mb-4"></div>
+              <p id="fittingProgressStage" class="text-sm font-bold text-white mb-2">Stage 1: 포즈 및 체형 분석 중...</p>
+              <div class="w-full max-w-xs bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+                <div id="fittingProgressBar" class="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-full w-1/4 transition-all duration-300"></div>
+              </div>
+              <span id="fittingProgressPct" class="text-xs text-violet-300 mt-2 font-mono">25%</span>
+            </div>
+
+            <!-- Badge Overlay -->
+            <div class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur px-2.5 py-1 rounded-full border border-slate-700 text-[10px] text-violet-300 flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="fittingStatusBadge">IDM-VTON 고화질 렌더러</span>
+            </div>
+          </div>
+
+          <!-- Bottom Action Controls -->
+          <div class="flex items-center space-x-3 mt-4 w-full max-w-sm justify-between">
+            <button onclick="triggerFittingSimulation()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-fuchsia-600/30 flex items-center justify-center space-x-1.5 transition">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i>
+              <span>가상 착장 렌더링 시작</span>
+            </button>
+            <button onclick="resetFittingCanvas()" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition">
+              초기화
+            </button>
+          </div>
+        </div>
+
+        <!-- Selected Garments Layers & Metrics (5 Cols) -->
+        <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center justify-between pb-3 border-b border-slate-800">
+              <span>착장 레이어 (Garment Layering)</span>
+              <span class="text-[11px] text-slate-400">피팅 순서 준수</span>
+            </h3>
+
+            <!-- Layer List -->
+            <div id="fittingLayersList" class="space-y-2.5 my-4">
+              <div class="flex items-center space-x-3 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+                <span class="w-5 h-5 rounded-full bg-violet-600/30 text-violet-400 text-xs flex items-center justify-center font-bold">1</span>
+                <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=100" class="w-10 h-10 object-cover rounded-lg" />
+                <div class="flex-1 min-w-0 text-xs">
+                  <p class="font-semibold text-white truncate">스카이블루 옥스포드 셔츠</p>
+                  <span class="text-[10px] text-slate-400">상의 (Inner Layer)</span>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+                <span class="w-5 h-5 rounded-full bg-violet-600/30 text-violet-400 text-xs flex items-center justify-center font-bold">2</span>
+                <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=100" class="w-10 h-10 object-cover rounded-lg" />
+                <div class="flex-1 min-w-0 text-xs">
+                  <p class="font-semibold text-white truncate">다크네이비 테일러드 블레이저</p>
+                  <span class="text-[10px] text-slate-400">아우터 (Outer Layer)</span>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+                <span class="w-5 h-5 rounded-full bg-violet-600/30 text-violet-400 text-xs flex items-center justify-center font-bold">3</span>
+                <img src="https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?w=100" class="w-10 h-10 object-cover rounded-lg" />
+                <div class="flex-1 min-w-0 text-xs">
+                  <p class="font-semibold text-white truncate">차콜 원턱 세미와이드 슬랙스</p>
+                  <span class="text-[10px] text-slate-400">하의 (Bottom Layer)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagnostics Metrics Panel -->
+            <div class="bg-slate-900/60 rounded-xl p-3.5 border border-slate-800 text-xs space-y-2">
+              <span class="font-bold text-slate-300 block">파이프라인 진단 지표 (Diagnostics)</span>
+              <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                <div>
+                  <span class="text-[10px] text-slate-400">추론 속도</span>
+                  <p class="font-mono font-bold text-emerald-400 mt-0.5">1.55s</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400">해상도</span>
+                  <p class="font-mono font-bold text-violet-400 mt-0.5">1024x1536</p>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400">얼굴 보존율</span>
+                  <p class="font-mono font-bold text-fuchsia-400 mt-0.5">94.2%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="saveFittedOutfitToArchive()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="check-check" class="w-4 h-4"></i>
+            <span>피팅된 착장 확정 & OOTD 캘린더에 기록</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. CALENDAR & ARCHIVE VIEW (D003-9) -->
+    <section id="view-calendar" class="tab-view hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="calendar" class="w-6 h-6 text-emerald-400"></i>
+            <span>OOTD 코디 캘린더 & 월간 착용 통계 (D003-9)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            매일 입은 코디를 날짜별로 보관하고, 착용 빈도 및 만족도 데이터를 정밀 분석합니다.
+          </p>
+        </div>
+        <button onclick="openLogOotdModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center space-x-2 shadow-lg shadow-emerald-600/20 transition">
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          <span>오늘 입은 착장 기록하기</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Monthly Calendar Grid (7 Cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-6 border border-slate-800">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-white text-base">2026년 11월 코디 다이어리</h3>
+            <span class="text-xs text-slate-400">총 2회 기록됨</span>
+          </div>
+
+          <!-- Calendar Header Days -->
+          <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400 mb-2">
+            <div class="text-rose-400">일</div>
+            <div>월</div>
+            <div>화</div>
+            <div>수</div>
+            <div>목</div>
+            <div>금</div>
+            <div class="text-blue-400">토</div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div id="calendarGridDays" class="grid grid-cols-7 gap-1.5 text-xs">
+            <!-- Generated via JS -->
+          </div>
+        </div>
+
+        <!-- Monthly Insights Report (5 Cols) -->
+        <div class="lg:col-span-5 glass-card rounded-2xl p-6 border border-slate-800 space-y-5">
+          <h3 class="text-sm font-bold text-white flex items-center justify-between pb-3 border-b border-slate-800">
+            <span>11월 스타일링 통계 리포트</span>
+            <span class="text-[10px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">월간 분석 완료</span>
+          </h3>
+
+          <!-- Top Stats -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800 text-center">
+              <span class="text-[11px] text-slate-400">평균 코디 만족도</span>
+              <p class="text-xl font-bold text-amber-400 mt-1">⭐ 4.8 / 5.0</p>
+            </div>
+            <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800 text-center">
+              <span class="text-[11px] text-slate-400">가장 선호한 스타일</span>
+              <p class="text-base font-bold text-violet-400 mt-1 truncate">스마트 캐주얼</p>
+            </div>
+          </div>
+
+          <!-- Most Worn Items TOP 3 -->
+          <div>
+            <span class="text-xs font-semibold text-slate-300 block mb-2.5">이번 달 최다 착용 아이템 TOP 3</span>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/50 border border-slate-800 text-xs">
+                <div class="flex items-center space-x-2">
+                  <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 font-bold flex items-center justify-center text-[10px]">1</span>
+                  <span class="text-white font-medium">화이트 레더 미니멀 스니커즈</span>
+                </div>
+                <span class="text-violet-400 font-semibold">28회 착용</span>
+              </div>
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/50 border border-slate-800 text-xs">
+                <div class="flex items-center space-x-2">
+                  <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-[10px]">2</span>
+                  <span class="text-white font-medium">차콜 원턱 세미와이드 슬랙스</span>
+                </div>
+                <span class="text-violet-400 font-semibold">19회 착용</span>
+              </div>
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/50 border border-slate-800 text-xs">
+                <div class="flex items-center space-x-2">
+                  <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-[10px]">3</span>
+                  <span class="text-white font-medium">다크네이비 테일러드 블레이저</span>
+                </div>
+                <span class="text-violet-400 font-semibold">16회 착용</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Breakdown Bar -->
+          <div class="pt-2">
+            <span class="text-xs font-semibold text-slate-300 block mb-2">카테고리별 착용 비중</span>
+            <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden flex">
+              <div class="bg-violet-500 h-full" style="width: 38%" title="상의 38%"></div>
+              <div class="bg-blue-500 h-full" style="width: 32%" title="하의 32%"></div>
+              <div class="bg-fuchsia-500 h-full" style="width: 18%" title="아우터 18%"></div>
+              <div class="bg-emerald-500 h-full" style="width: 12%" title="슈즈 12%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1.5">
+              <span>상의 38%</span>
+              <span>하의 32%</span>
+              <span>아우터 18%</span>
+              <span>슈즈 12%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. PROFILE & ONBOARDING VIEW (D003-2) -->
+    <section id="view-profile" class="tab-view hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center space-x-2">
+            <i data-lucide="user-cog" class="w-6 h-6 text-violet-400"></i>
+            <span>사용자 프로필 & 온보딩 설정 (D003-2)</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            닉네임, 성별, 거주 지역(기상 연동), 직업군, 선호 스타일 및 퍼스널 컬러를 설정합니다.
+          </p>
+        </div>
+      </div>
+
+      <div class="max-w-2xl mx-auto glass-card rounded-2xl p-6 sm:p-8 border border-slate-800 space-y-6">
+        <!-- Nickname & Gender -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">닉네임</label>
+            <input type="text" id="profNickname" value="스타일마스터" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">성별 (체형 랜드마크 DB 매핑)</label>
+            <select id="profGender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500">
+              <option value="female" selected>여성</option>
+              <option value="male">남성</option>
+              <option value="other">기타 / 젠더리스</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Country & City -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">국가</label>
+            <select id="profCountry" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500">
+              <option value="KR" selected>🇰🇷 대한민국 (South Korea)</option>
+              <option value="US">🇺🇸 미국 (United States)</option>
+              <option value="JP">🇯🇵 일본 (Japan)</option>
+              <option value="FR">🇫🇷 프랑스 (France)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">거주 도시 (기상청/날씨 연동)</label>
+            <select id="profCity" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500" onchange="changeWeatherCity(this.value)">
+              <option value="서울특별시" selected>서울특별시</option>
+              <option value="부산광역시">부산광역시</option>
+              <option value="대구광역시">대구광역시</option>
+              <option value="제주시">제주시</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Occupation & Personal Color -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">직업군 (라이프스타일 핏)</label>
+            <select id="profOccupation" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500">
+              <option value="it_design" selected>IT / 기획 / 디자인</option>
+              <option value="office_worker">사무직 / 전문직</option>
+              <option value="student">학생 / 대학생</option>
+              <option value="service_sales">서비스 / 영업직</option>
+              <option value="self_employed">자영업</option>
+              <option value="other">기타</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1.5 font-medium">퍼스널 컬러</label>
+            <select id="profColor" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-violet-500">
+              <option value="여름쿨톤" selected>여름 쿨톤 (Summer Cool)</option>
+              <option value="봄웜톤">봄 웜톤 (Spring Warm)</option>
+              <option value="가을웜톤">가을 웜톤 (Autumn Warm)</option>
+              <option value="겨울쿨톤">겨울 쿨톤 (Winter Cool)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Preferred Styles -->
+        <div>
+          <label class="block text-slate-300 mb-2 font-medium text-xs">선호 스타일 (최대 3개 선택)</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <label class="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-violet-500">
+              <input type="checkbox" checked value="casual" class="accent-violet-600">
+              <span>캐주얼</span>
+            </label>
+            <label class="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-violet-500">
+              <input type="checkbox" checked value="minimal" class="accent-violet-600">
+              <span>미니멀</span>
+            </label>
+            <label class="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-violet-500">
+              <input type="checkbox" checked value="business_casual" class="accent-violet-600">
+              <span>비즈니스 캐주얼</span>
+            </label>
+            <label class="flex items-center space-x-2 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-violet-500">
+              <input type="checkbox" value="street" class="accent-violet-600">
+              <span>스트릿</span>
+            </label>
+          </div>
+        </div>
+
+        <button onclick="saveUserProfile()" class="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm shadow-lg shadow-violet-600/30 transition flex items-center justify-center space-x-2">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>프로필 설정 저장 완료</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+  <!-- 1. Add Clothing Item Modal (D003-4) -->
+  <div id="modalAddItem" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-white text-base">새 옷장 아이템 등록</h3>
+        <button onclick="closeAddItemModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1">아이템 명칭</label>
+          <input type="text" id="addName" placeholder="예: 캐시미어 크루넥 니트" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-300 mb-1">카테고리</label>
+            <select id="addCategory" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <option value="top">상의 (top)</option>
+              <option value="pants">바지 (pants)</option>
+              <option value="outer">아우터 (outer)</option>
+              <option value="shoes">신발 (shoes)</option>
+              <option value="bag">가방 (bag)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">대표 색상</label>
+            <select id="addColor" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <option value="블랙">블랙</option>
+              <option value="화이트">화이트</option>
+              <option value="네이비">네이비</option>
+              <option value="그레이">그레이</option>
+              <option value="베이지">베이지</option>
+              <option value="블루">블루</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">이미지 URL (선택)</label>
+          <input type="text" id="addImageUrl" placeholder="https://..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+        <button onclick="closeAddItemModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs">취소</button>
+        <button onclick="submitNewItem()" class="px-4 py-2 rounded-lg bg-violet-600 text-white font-semibold text-xs">등록하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-violet-600 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold flex items-center space-x-2 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4"></i>
+    <span id="toastMsg">알림 메시지</span>
+  </div>
+
+  <!-- APP LOGIC & STATE SCRIPT -->
+  <script src="./app.js"></script>
+</body>
+</html>
+
